@@ -120,8 +120,14 @@ export default function Dashboard() {
     }
 
     const handleLogout = async () => {
-        await supabase.auth.signOut()
-        router.push('/login')
+        try {
+            await supabase.auth.signOut()
+            // Using window.location for a full refresh to clear any cached states
+            window.location.href = '/login'
+        } catch (err) {
+            console.error('Logout error:', err)
+            router.push('/login')
+        }
     }
 
     return (

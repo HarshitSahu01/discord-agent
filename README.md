@@ -65,8 +65,18 @@ cp .env.example .env
 pnpm run dev
 ```
 
-## 📝 Recent Updates
+## � Deployment
+
+### Selective CI/CD with GitHub Actions
+The project includes a GitHub Actions workflow `.github/workflows/render-discord-bot.yml` that intelligently handles deployments to Render. 
+
+- **Smart Redeploy**: The workflow only triggers a Render redeploy if changes are detected within the `discord-bot/` directory. Changes to the frontend or other root files will not trigger a backend redeploy, saving build minutes and reducing downtime.
+- **Webhook Trigger**: It uses a Render Deploy Hook. To use this:
+    1. Define a secret `RENDER_DISCORD_BOT_WEBHOOK` in your GitHub repository settings with your Render deploy URL.
+
+## �📝 Recent Updates
 
 - **Production Ready**: Configured `main.py` for correct port binding on Render/Production environments.
 - **Unified UI**: Consolidated the "Knowledge Base" file management into a single, clean list with delete capabilities and status tracking.
 - **Robustness**: Improved error handling in document processing and upload workflows.
+- **Selective Deployment**: Added a GitHub Action to optimize backend deployments.
