@@ -77,7 +77,7 @@ export default function Dashboard() {
             .from('uploads')
             .select('*')
             .order('created_at', { ascending: false })
-            .limit(10)
+            .limit(50)
 
         if (uplds) setUploads(uplds)
 
@@ -314,58 +314,55 @@ export default function Dashboard() {
                             <p className="text-gray-400 mt-1">Upload PDF or Text documents to train your agent.</p>
                         </div>
 
-                        {/* Upload Status */}
+                        {/* Uploads & Files List */}
                         {uploads.length > 0 && (
                             <div className="mb-8">
-                                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Processing Queue</h3>
+                                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Files</h3>
                                 <div className="space-y-3">
                                     {uploads.map((upload) => (
-                                        <div key={upload.id} className="bg-gray-900 border border-gray-800 p-4 rounded-xl flex items-center justify-between">
+                                        <div key={upload.id} className="bg-gray-900 border border-gray-800 p-4 rounded-xl flex items-center justify-between group hover:border-gray-700 transition-all">
                                             <div className="flex items-center gap-3">
                                                 {upload.status === 'processing' && <Activity size={18} className="text-blue-400 animate-spin" />}
                                                 {upload.status === 'completed' && <div className="w-2 h-2 rounded-full bg-green-500" />}
                                                 {upload.status === 'failed' && <div className="w-2 h-2 rounded-full bg-red-500" />}
                                                 <span className="text-gray-300 font-mono text-sm">{upload.filename}</span>
                                             </div>
-                                            <span className={`text-xs font-semibold px-2 py-1 rounded ${upload.status === 'processing' ? 'bg-blue-500/10 text-blue-400' :
+
+                                            <div className="flex items-center gap-3">
+                                                <span className={`text-xs font-semibold px-2 py-1 rounded ${upload.status === 'processing' ? 'bg-blue-500/10 text-blue-400' :
                                                     upload.status === 'completed' ? 'bg-green-500/10 text-green-400' :
                                                         'bg-red-500/10 text-red-400'
-                                                }`}>
-                                                {upload.status}
-                                            </span>
+                                                    }`}>
+                                                    {upload.status}
+                                                </span>
+                                                <button
+                                                    onClick={async () => {
+                                                        if (!confirm(`Delete ${upload.filename}?`)) return
+
+                                                        // Delete from docs (embeddings)
+                                                        await supabase
+                                                            .from('documents')
+                                                            .delete()
+                                                            .contains('metadata', { source: upload.filename })
+
+                                                        // Delete from uploads record
+                                                        await supabase
+                                                            .from('uploads')
+                                                            .delete()
+                                                            .eq('id', upload.id)
+
+                                                        fetchData()
+                                                    }}
+                                                    className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
                         )}
-
-                        {/* Document List */}
-                        <div className="grid gap-4 mb-8">
-                            {documents.map((doc) => (
-                                <div key={doc} className="bg-gray-900 border border-gray-800 p-4 rounded-xl flex justify-between items-center group hover:border-gray-700 transition-all">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-2 bg-gray-800 rounded-lg">
-                                            <FileText size={20} className="text-orange-400" />
-                                        </div>
-                                        <span className="font-mono text-gray-300 truncate max-w-md">{doc}</span>
-                                    </div>
-                                    <button
-                                        onClick={async () => {
-                                            if (!confirm(`Delete all chunks for ${doc}?`)) return
-                                            // Delete chunks where metadata->>source equals doc
-                                            await supabase
-                                                .from('documents')
-                                                .delete()
-                                                .contains('metadata', { source: doc })
-                                            fetchData()
-                                        }}
-                                        className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                                    >
-                                        <Trash2 size={18} />
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
 
                         <div className="bg-gray-900 rounded-xl border border-gray-800 p-8 flex flex-col items-center justify-center text-center dashed-border border-dashed">
                             <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mb-4">

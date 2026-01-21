@@ -64,7 +64,7 @@ export default function Home() {
           )}
 
           <a
-            href="https://github.com"
+            href="https://github.com/HarshitSahu01/discord-agent"
             target="_blank"
             className="flex items-center justify-center gap-2 h-14 px-8 rounded-full bg-gray-900 border border-gray-800 font-semibold text-gray-300 transition-all hover:bg-gray-800 hover:border-gray-700"
           >

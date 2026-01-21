@@ -1,0 +1,41 @@
+name: Deploy Discord Bot to Render
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history needed for safe diff
+
+      - name: Detect changes in discord-bot
+        id: changes
+        run: |
+          echo "Comparing commits:"
+          echo "Before: ${{ github.event.before }}"
+          echo "After:  ${{ github.sha }}"
+
+          CHANGED_FILES=$(git diff --name-only \
+            ${{ github.event.before }} \
+            ${{ github.sha }})
+
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          if echo "$CHANGED_FILES" | grep -q '^discord-bot/'; then
+            echo "discord_bot_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "discord_bot_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Trigger Render webhook
+        if: steps.changes.outputs.discord_bot_changed == 'true'
+        run: |
+          curl -X POST "${{ secrets.RENDER_DISCORD_BOT_WEBHOOK }}"

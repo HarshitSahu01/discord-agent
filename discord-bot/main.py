@@ -76,4 +76,8 @@ def read_root():
     return {"status": "Discord Copilot Backend Running"}
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    PORT= int(os.getenv('PORT') or 8000)
+    if os.getenv("ENV") == "DEPLOYEMENT":
+        uvicorn.run("main:app", host="[IP_ADDRESS]", port=PORT, reload=True)
+    else:
+        uvicorn.run("main:app", host="0.0.0.0", port=PORT, reload=False)
